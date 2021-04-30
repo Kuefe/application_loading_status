@@ -117,7 +117,7 @@ class LoadingButton @JvmOverloads constructor(
         )
 
         // draw the circle
-        paint.color = getResources().getColor(color.colorAccent, null)
+        paint.color = resources.getColor(color.colorAccent, null)
         val rect = RectF(
             (widthSize + paint.textSize) * 2f / 3f,
             (heightSize - CIRCLE_SIZE) / 2f,

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?><!-- xml/detail.xml -->
+
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <!-- A transition describes an animation via start and end state -->
+    <Transition
+        app:autoTransition="animateToEnd"
+        app:constraintSetEnd="@+id/end"
+        app:constraintSetStart="@+id/start"
+        app:duration="5000"></Transition>
+
+    <!-- TODO: Define @id/start -->
+    <!-- Constraints to apply at the beginning of the animation -->
+    <ConstraintSet android:id="@+id/start">
+        <Constraint
+            android:id="@+id/status_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0"
+            app:layout_constraintBottom_toTopOf="@+id/ok_button"
+            app:layout_constraintStart_toStartOf="@id/filename_label" />
+        <Constraint
+            android:id="@+id/status_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0"
+            app:layout_constraintBottom_toTopOf="@+id/ok_button"
+            app:layout_constraintStart_toStartOf="@+id/filename_text" />
+    </ConstraintSet>
+
+    <!-- Constraints to apply at the end of the animation -->
+    <ConstraintSet android:id="@+id/end">
+        <Constraint
+            android:id="@+id/status_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="1"
+            app:layout_constraintStart_toStartOf="@id/filename_label"
+            app:layout_constraintTop_toBottomOf="@+id/filename_text" />
+        <Constraint
+            android:id="@+id/status_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="1"
+            app:layout_constraintStart_toStartOf="@id/filename_text"
+            app:layout_constraintTop_toBottomOf="@+id/filename_text" />
+    </ConstraintSet>
+</MotionScene>

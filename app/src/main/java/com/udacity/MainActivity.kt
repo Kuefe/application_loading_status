@@ -1,20 +1,22 @@
 package com.udacity
 
 import android.app.DownloadManager
+import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.database.Cursor
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.view.View
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import timber.log.Timber
@@ -26,10 +28,9 @@ class MainActivity : AppCompatActivity() {
     private var downloadID: Long = 0
 
     private lateinit var notificationManager: NotificationManager
-    private lateinit var pendingIntent: PendingIntent
-    private lateinit var action: NotificationCompat.Action
 
     private var url = ""
+    private var fileName = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,26 +39,57 @@ class MainActivity : AppCompatActivity() {
 
         Timber.plant(DebugTree())
 
+        // Call create channel
+        createChannel(
+            getString(R.string.download_notification_channel_id),
+            getString(R.string.download_notification_channel_name)
+        )
+
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
+        // initialized notificationManager
+        notificationManager = ContextCompat.getSystemService(
+            this,
+            NotificationManager::class.java
+        ) as NotificationManager
+
         custom_button.setOnClickListener {
-            // if no radio button is activate then toast message
+            // if no radio button is selected then toast message
             if (url == "") {
                 Toast.makeText(applicationContext, R.string.no_file_selected, Toast.LENGTH_SHORT)
                     .show()
             } else {
+                // cancel previous notifications
+                notificationManager.cancelNotifications()
                 download()
+
             }
         }
     }
 
+    // send the notification
+    private fun sendNotifcation(status: Boolean) {
+
+        notificationManager.sendNotification(
+            status,
+            fileName,
+            this
+        )
+    }
+
+    // broadcastReceiver end of the download
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             Timber.i("onReceive")
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+            if (id != null) {
+                val status: Boolean = checkStatus(id)
+                sendNotifcation(status)
+            }
         }
     }
 
+    // download the selected file
     private fun download() {
         Timber.i("download")
         val request =
@@ -77,12 +109,21 @@ class MainActivity : AppCompatActivity() {
             downloadManager.enqueue(request)// enqueue puts the download request in the queue.
     }
 
-    companion object {
-        private const val URL =
-            "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
-        private const val CHANNEL_ID = "channelId"
+    // Check status
+    private fun checkStatus(downloadId: Long): Boolean {
+        Timber.i("validDownload")
+        val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+        //Verify if download is a success
+        val cursor: Cursor =
+            downloadManager.query(DownloadManager.Query().setFilterById(downloadId))
+        if (cursor.moveToFirst()) {
+            val status: Int = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
+            if (status == DownloadManager.STATUS_SUCCESSFUL) return true
+        }
+        return false
     }
 
+    // handle the radioButton
     fun onRadioButtonClicked(view: View) {
         Timber.i("onRadioButtonClicked")
 
@@ -95,17 +136,37 @@ class MainActivity : AppCompatActivity() {
                 R.id.radio_glide ->
                     if (checked) {
                         url = "https://github.com/bumptech/glide/archive/refs/heads/master.zip"
+                        fileName = getString(R.string.glide)
                     }
                 R.id.radio_udacity ->
                     if (checked) {
                         url =
-                            "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
+                            "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/refs/heads/master.zip"
+                        fileName = getString(R.string.udacity)
                     }
                 R.id.radio_retrofit ->
                     if (checked) {
                         url = "https://github.com/square/retrofit/archive/refs/heads/master.zip"
+                        fileName = getString(R.string.retrofit)
                     }
             }
         }
     }
+
+    // create a channel for the notification
+    private fun createChannel(channelId: String, channelName: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Create the NotificationChannel
+            val descriptionText = getString(R.string.notification_description)
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(channelId, channelName, importance)
+            channel.description = descriptionText
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+
 }
