@@ -1,16 +1,18 @@
 package com.udacity
 
+import android.app.NotificationManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.udacity.databinding.ActivityDetailBinding
 import kotlinx.android.synthetic.main.activity_detail.*
 import kotlinx.android.synthetic.main.content_detail.*
-import timber.log.Timber
 
 
 class DetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDetailBinding
+    private lateinit var notificationManager: NotificationManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,6 +21,14 @@ class DetailActivity : AppCompatActivity() {
         setContentView(R.layout.activity_detail)
         setSupportActionBar(toolbar)
 
+        // initialized notificationManager
+        notificationManager = ContextCompat.getSystemService(
+            this,
+            NotificationManager::class.java
+        ) as NotificationManager
+        // cancel notification
+        notificationManager.cancelNotifications()
+
         // getting the bundle back from the MainActivity
         val bundle = intent.extras
 
@@ -26,8 +36,10 @@ class DetailActivity : AppCompatActivity() {
         var status: Boolean? = null
         // Default Value false
         status = bundle!!.getBoolean("status", false)
-        if (status) status_text.text = getString(R.string.success) else status_text.text = getString(
-                    R.string.failed)
+        if (status) status_text.text = getString(R.string.success) else status_text.text =
+            getString(
+                R.string.failed
+            )
 
         // filename of the download
         var fileName: String? = null

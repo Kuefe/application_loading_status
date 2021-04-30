@@ -59,10 +59,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(applicationContext, R.string.no_file_selected, Toast.LENGTH_SHORT)
                     .show()
             } else {
-                // cancel previous notifications
-                notificationManager.cancelNotifications()
                 download()
-
             }
         }
     }
