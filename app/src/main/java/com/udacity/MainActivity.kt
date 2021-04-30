@@ -96,10 +96,10 @@ class MainActivity : AppCompatActivity() {
                 .setRequiresCharging(false)
                 .setAllowedOverMetered(true)
                 .setAllowedOverRoaming(true)
-                .setDestinationInExternalPublicDir(
-                    Environment.DIRECTORY_DOWNLOADS,
-                    "master.zip"
-                )
+//                .setDestinationInExternalPublicDir(
+//                    Environment.DIRECTORY_DOWNLOADS,
+//                    "master.zip"
+//                )
 
         val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         downloadID =
