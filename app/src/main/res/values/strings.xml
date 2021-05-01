@@ -26,4 +26,7 @@
     <string name="ok">OK</string>
     <string name="success">Success</string>
     <string name="failed">Failed</string>
+    <string name="no_permission">No permission</string>
+    <string name="reason_for_permission">To save the download files, \"LoadApp\" need access to the filesystem</string>
+    <string name="okay">Okay</string>
 </resources>

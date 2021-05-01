@@ -70,6 +70,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         } else {
+            // when permission no granted the custom button is inactive
             custom_button.isClickable = false
         }
     }
@@ -117,11 +118,11 @@ class MainActivity : AppCompatActivity() {
     private fun permissionDialog() {
         Timber.i("permissionDialog")
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("No permission")
-        builder.setMessage("To save the download files, \"LoadApp\" need access to the filesystem")
+        builder.setTitle(getString(R.string.no_permission))
+        builder.setMessage(R.string.reason_for_permission)
         builder.apply {
             setPositiveButton(
-                "Okay",
+                getString(R.string.okay),
                 DialogInterface.OnClickListener { dialog, which -> })
         }
         builder.show()
