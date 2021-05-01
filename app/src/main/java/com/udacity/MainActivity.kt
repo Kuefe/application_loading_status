@@ -1,12 +1,11 @@
 package com.udacity
 
+import android.Manifest
 import android.app.DownloadManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
 import android.os.Build
@@ -15,7 +14,9 @@ import android.os.Environment
 import android.view.View
 import android.widget.RadioButton
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
@@ -53,15 +54,77 @@ class MainActivity : AppCompatActivity() {
             NotificationManager::class.java
         ) as NotificationManager
 
-        custom_button.setOnClickListener {
-            // if no radio button is selected then toast message
-            if (url == "") {
-                Toast.makeText(applicationContext, R.string.no_file_selected, Toast.LENGTH_SHORT)
-                    .show()
-            } else {
-                download()
+        if (isStoragePermissionGranted()) {
+
+            custom_button.setOnClickListener {
+                // if no radio button is selected then toast message
+                if (url == "") {
+                    Toast.makeText(
+                        applicationContext,
+                        R.string.no_file_selected,
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                } else {
+                    download()
+                }
             }
+        } else {
+            custom_button.isClickable = false
         }
+    }
+
+    // https://stackoverflow.com/questions/33162152/storage-permission-error-in-marshmallow
+    fun isStoragePermissionGranted(): Boolean {
+        Timber.i("isStoragePermissionGranted")
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED
+            ) {
+                true
+            } else {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                    1
+                )
+                false
+            }
+        } else { //permission is automatically granted on sdk<23 upon installation
+            Timber.i("Permission is granted")
+            true
+        }
+    }
+
+
+    // This function is called when the user accepts or decline the permission.
+    // Request Code is used to check which permission called this function.
+    // This request code is provided when the user is prompt for permission.
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        Timber.i("onRequestPermissionsResult")
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Timber.i("Permission is granted")
+        } else {
+            permissionDialog()
+        }
+    }
+
+    private fun permissionDialog() {
+        Timber.i("permissionDialog")
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("No permission")
+        builder.setMessage("To save the download files, \"LoadApp\" need access to the filesystem")
+        builder.apply {
+            setPositiveButton(
+                "Okay",
+                DialogInterface.OnClickListener { dialog, which -> })
+        }
+        builder.show()
     }
 
     // send the notification
@@ -96,10 +159,10 @@ class MainActivity : AppCompatActivity() {
                 .setRequiresCharging(false)
                 .setAllowedOverMetered(true)
                 .setAllowedOverRoaming(true)
-//                .setDestinationInExternalPublicDir(
-//                    Environment.DIRECTORY_DOWNLOADS,
-//                    "master.zip"
-//                )
+                .setDestinationInExternalPublicDir(
+                    Environment.DIRECTORY_DOWNLOADS,
+                    "repos/master.zip"
+                )
 
         val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         downloadID =
