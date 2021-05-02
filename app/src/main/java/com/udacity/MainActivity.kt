@@ -20,6 +20,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.android.synthetic.main.content_main.view.*
 import timber.log.Timber
 import timber.log.Timber.DebugTree
 
@@ -54,24 +55,21 @@ class MainActivity : AppCompatActivity() {
             NotificationManager::class.java
         ) as NotificationManager
 
-        if (isStoragePermissionGranted()) {
+        // check permission
+        isStoragePermissionGranted()
 
-            custom_button.setOnClickListener {
-                // if no radio button is selected then toast message
-                if (url == "") {
-                    Toast.makeText(
-                        applicationContext,
-                        R.string.no_file_selected,
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
-                } else {
-                    download()
-                }
+        custom_button.setOnClickListener {
+            // if no radio button is selected then toast message
+            if (url == "") {
+                Toast.makeText(
+                    applicationContext,
+                    R.string.no_file_selected,
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            } else {
+                download()
             }
-        } else {
-            // when permission no granted the custom button is inactive
-            custom_button.isClickable = false
         }
     }
 
@@ -111,6 +109,8 @@ class MainActivity : AppCompatActivity() {
         if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Timber.i("Permission is granted")
         } else {
+            // deactivate button when permission is not granted
+            custom_button.isClickable = false
             permissionDialog()
         }
     }
@@ -162,7 +162,7 @@ class MainActivity : AppCompatActivity() {
                 .setAllowedOverRoaming(true)
                 .setDestinationInExternalPublicDir(
                     Environment.DIRECTORY_DOWNLOADS,
-                    "repos/master.zip"
+                    "master.zip"
                 )
 
         val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager

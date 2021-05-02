@@ -10,6 +10,7 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.withStyledAttributes
 import com.udacity.R.color
+import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.content_main.view.*
 import timber.log.Timber
 import kotlin.properties.Delegates
@@ -62,7 +63,7 @@ class LoadingButton @JvmOverloads constructor(
     // initialize
     init {
         // Setting the view's isClickable property to true enables that view to accept user input.
-        isClickable = true
+        custom_button.isClickable = true
 
         // supply the attributes and view, and and set your local variables.
         context.withStyledAttributes(attrs, R.styleable.LoadingButton) {
